@@ -1,0 +1,31 @@
+Insert: 0
+Insert: 1
+Insert: 2
+Insert: 3
+Insert: 2
+Insert: 4
+Anthony 91 1
+Caesar 47 5
+Hana 68 1
+Kevin 33 2
+Poa 72 3
+Polter 85 6
+Anthony Tabby 91
+Kevin Maine 33
+friendly: Anthony Poa Polter
+lazy: Anthony Caesar Kevin
+Deletion Complete
+Anthony 91 1
+Caesar 47 5
+Hana 68 1
+Kevin 33 2
+Poa 72 3
+2
+Caesar 47 3
+Hana 68 1
+Kevin 33 2
+Deletion Complete
+Deletion Complete
+Deletion Complete
+EMPTY
+NO SMALLEST ELEMENT FOUND
