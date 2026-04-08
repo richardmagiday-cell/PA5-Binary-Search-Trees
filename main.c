@@ -1,5 +1,3 @@
-/* COP 3502C PA5
-This program is written by: Richard Magiday */
 /******************************************************************************
 Richard Magiday
 cop3502c_cmb_26
