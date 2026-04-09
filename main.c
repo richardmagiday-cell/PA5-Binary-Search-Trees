@@ -246,12 +246,7 @@ int getSubtreeSize(BST_Node *root) {
 
 /*==================== BST CORE OPERATIONS ====================*/
 
-/*
- * insert - recursively insert newCat into the BST keyed by name.
- * depth tracks how deep the new node landed (root = 0).
- * replaced is set to 1 if an existing node's data was swapped out.
- * subtree_size is updated on the way back up.
- */
+/* insert a cat into the BST, tracking depth and whether a duplicate was replaced */
 BST_Node *insert(BST_Node *root, Cat *newCat, int *depth, int *replaced) {
 
     /* empty spot - place the node here */
@@ -328,12 +323,7 @@ int hasOnlyRightChild(BST_Node *node) {
     return (node != NULL && node->left == NULL && node->right != NULL);
 }
 
-/*
- * deleteNode - 3-case BST deletion.
- * Uses successor (min of right subtree) for two-child case.
- * If name is not found, returns root unchanged.
- * subtree_size is updated on the way back up.
- */
+/* delete a cat by name, handling all three BST deletion cases */
 BST_Node *deleteNode(BST_Node *root, char *name) {
 
     BST_Node *save_node, *new_del_node;
@@ -404,13 +394,7 @@ BST_Node *deleteNode(BST_Node *root, char *name) {
 
 /*==================== QUERY HELPERS ====================*/
 
-/*
- * findKthSmallest - O(h) using subtree_size.
- * leftSize = number of nodes in left subtree.
- * If k == leftSize + 1, current node is the answer.
- * If k <= leftSize, answer is in left subtree.
- * Otherwise answer is in right subtree with adjusted k.
- */
+/* find the kth smallest node alphabetically using subtree sizes */
 BST_Node *findKthSmallest(BST_Node *root, int k) {
 
     int leftSize = getSubtreeSize(root->left);
@@ -448,11 +432,7 @@ void collectTraitMatches(BST_Node *root, int traitIndex, int traitValue,
     collectTraitMatches(root->right, traitIndex, traitValue, result, idx);
 }
 
-/*
- * filterByTrait - O(n)
- * malloc char** to tree size, deep copy matching names,
- * realloc down to exact result count before returning.
- */
+/* return an array of names of cats matching the given trait index and value */
 char **filterByTrait(BST_Node *root, int traitIndex, int traitValue, int *resultSize) {
 
     int idx = 0;
@@ -471,7 +451,7 @@ char **filterByTrait(BST_Node *root, int traitIndex, int traitValue, int *result
 
     *resultSize = idx;
 
-    /* realloc to exact size - if 0 matches keep 1 slot to avoid malloc(0) */
+    /* shrink array to actual number of results */
     if (idx == 0)
         result = (char **)realloc(result, sizeof(char *));
     else
@@ -496,11 +476,7 @@ void collectNamesToDelete(BST_Node *root, int traitIndex, int traitValue,
     collectNamesToDelete(root->right, traitIndex, traitValue, names, count);
 }
 
-/*
- * removeByTrait - O(n * h)
- * Phase 1: collect all matching names (O(n) traversal)
- * Phase 2: delete each by name (O(h) per delete)
- */
+/* delete all cats matching the given trait index and value, return count removed */
 int removeByTrait(BST_Node **root, int traitIndex, int traitValue) {
 
     int count = 0, i, totalNodes;
@@ -511,10 +487,10 @@ int removeByTrait(BST_Node **root, int traitIndex, int traitValue) {
     totalNodes = getSubtreeSize(*root);
     names = (char **)malloc(totalNodes * sizeof(char *));
 
-    /* phase 1: gather names */
+    /* gather matching names first, then delete each one */
     collectNamesToDelete(*root, traitIndex, traitValue, names, &count);
 
-    /* phase 2: delete each */
+    /* delete each collected name */
     for (i = 0; i < count; i++) {
         *root = deleteNode(*root, names[i]);
         free(names[i]);
