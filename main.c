@@ -329,7 +329,7 @@ int hasOnlyRightChild(BST_Node *node) {
 }
 
 /*
- * deleteNode - 3-case BST deletion matching lecture framework style.
+ * deleteNode - 3-case BST deletion.
  * Uses successor (min of right subtree) for two-child case.
  * If name is not found, returns root unchanged.
  * subtree_size is updated on the way back up.
