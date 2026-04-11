@@ -2,7 +2,7 @@
 Richard Magiday
 cop3502c_cmb_26
 03/18/26
-problem: CS1 PA4
+problem: CS1 PA5
 
 cd PA5
 gcc main.c
@@ -34,7 +34,7 @@ const char *TRAIT_NAMES[NUM_TRAITS] = {
     "friendly", "grumpy", "playful", "lazy", "curious"
 };
 
-/*==================== FUNCTION PROTOTYPES ====================*/
+/* function prototypes */
 
 char *makeStringExact(const char *src);
 Cat *createCat(char *name, char *breed, int charm, int traits[]);
@@ -62,7 +62,6 @@ void collectNamesToDelete(BST_Node *root, int traitIndex, int traitValue,
                           char **names, int *count);
 int removeByTrait(BST_Node **root, int traitIndex, int traitValue);
 
-/*==================== MAIN ====================*/
 
 int main() {
 
@@ -97,7 +96,7 @@ int main() {
                 printf("Replaced\n");           /* duplicate with strictly more traits */
             else if (replaced == 0)
                 printf("Insert: %d\n", depth);  /* new node: print its depth */
-            /* replaced == -1: duplicate ignored, no output */
+            /* else ignored, no output */
         }
 
         /* query 2: remove a cat by name */
@@ -118,7 +117,7 @@ int main() {
                 printf("NO SMALLEST ELEMENT FOUND\n");
             }
             else {
-                BST_Node *ans = findKthSmallest(root, k); /* O(h) lookup using subtree_size */
+                BST_Node *ans = findKthSmallest(root, k);
                 printf("%s %s %d\n", ans->cat->name, ans->cat->breed, ans->cat->charm);
             }
         }
@@ -131,7 +130,6 @@ int main() {
 
             scanf("%d %d", &traitIndex, &traitValue);
 
-            /* returns a deep-copied, realloc'd array of matching names in alphabetical order */
             char **result = filterByTrait(root, traitIndex, traitValue, &resultSize);
 
             if (resultSize == 0) {
@@ -154,7 +152,6 @@ int main() {
             int traitIndex, traitValue;
             scanf("%d %d", &traitIndex, &traitValue);
 
-            /* two-phase: collect matching names, then delete each one */
             int removedCount = removeByTrait(&root, traitIndex, traitValue);
 
             if (removedCount == 0)
@@ -176,7 +173,7 @@ int main() {
     return 0;
 }
 
-/*==================== STRING / CAT / NODE HELPERS ====================*/
+/* helper functions */
 
 /* allocate exact memory for a string and copy it */
 char *makeStringExact(const char *src) {
@@ -190,7 +187,7 @@ Cat *createCat(char *name, char *breed, int charm, int traits[]) {
     Cat *temp = (Cat *)malloc(sizeof(Cat));
     int i;
 
-    temp->name  = makeStringExact(name);
+    temp->name = makeStringExact(name);
     temp->breed = makeStringExact(breed);
     temp->charm = charm;
 
@@ -203,9 +200,9 @@ Cat *createCat(char *name, char *breed, int charm, int traits[]) {
 /* allocate a BST node wrapping the given Cat */
 BST_Node *createNode(Cat *newCat) {
     BST_Node *temp = (BST_Node *)malloc(sizeof(BST_Node));
-    temp->cat          = newCat;
-    temp->left         = NULL;
-    temp->right        = NULL;
+    temp->cat = newCat;
+    temp->left = NULL;
+    temp->right = NULL;
     temp->subtree_size = 1;
     return temp;
 }
@@ -218,7 +215,7 @@ void freeCat(Cat *cat) {
     free(cat);
 }
 
-/* post-order free of entire tree */
+/* free the whole tree */
 void freeTree(BST_Node *root) {
     if (root == NULL) return;
     freeTree(root->left);
@@ -227,7 +224,6 @@ void freeTree(BST_Node *root) {
     free(root);
 }
 
-/*==================== UTILITY HELPERS ====================*/
 
 /* count how many traits are set to 1 */
 int countTraits(Cat *cat) {
@@ -238,13 +234,12 @@ int countTraits(Cat *cat) {
     return count;
 }
 
-/* safe subtree size - returns 0 for NULL */
+/* returns subtree size, 0 if null */
 int getSubtreeSize(BST_Node *root) {
     if (root == NULL) return 0;
     return root->subtree_size;
 }
 
-/*==================== BST CORE OPERATIONS ====================*/
 
 /* insert a cat into the BST, tracking depth and whether a duplicate was replaced */
 BST_Node *insert(BST_Node *root, Cat *newCat, int *depth, int *replaced) {
@@ -278,7 +273,7 @@ BST_Node *insert(BST_Node *root, Cat *newCat, int *depth, int *replaced) {
     else
         root->right = insert(root->right, newCat, depth, replaced);
 
-    /* update size only when a brand-new node was added (not replaced or ignored) */
+    /* only update size if a new node was actually added */
     if (*replaced == 0)
         root->subtree_size = 1 + getSubtreeSize(root->left) + getSubtreeSize(root->right);
 
@@ -392,7 +387,6 @@ BST_Node *deleteNode(BST_Node *root, char *name) {
     return root;
 }
 
-/*==================== QUERY HELPERS ====================*/
 
 /* find the kth smallest node alphabetically using subtree sizes */
 BST_Node *findKthSmallest(BST_Node *root, int k) {
@@ -416,7 +410,7 @@ void inorderPrint(BST_Node *root) {
     inorderPrint(root->right);
 }
 
-/* collect deep-copied names of matching cats in alphabetical (inorder) order */
+/* collect names of cats that match the trait, in order */
 void collectTraitMatches(BST_Node *root, int traitIndex, int traitValue,
                          char **result, int *idx) {
 
@@ -460,7 +454,7 @@ char **filterByTrait(BST_Node *root, int traitIndex, int traitValue, int *result
     return result;
 }
 
-/* collect names of nodes to delete in phase 1 of removeByTrait */
+/* collect names of matching nodes to delete */
 void collectNamesToDelete(BST_Node *root, int traitIndex, int traitValue,
                           char **names, int *count) {
 
@@ -487,7 +481,6 @@ int removeByTrait(BST_Node **root, int traitIndex, int traitValue) {
     totalNodes = getSubtreeSize(*root);
     names = (char **)malloc(totalNodes * sizeof(char *));
 
-    /* gather matching names first, then delete each one */
     collectNamesToDelete(*root, traitIndex, traitValue, names, &count);
 
     /* delete each collected name */
