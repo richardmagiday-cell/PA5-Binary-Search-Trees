@@ -34,8 +34,6 @@ const char *TRAIT_NAMES[NUM_TRAITS] = {
     "friendly", "grumpy", "playful", "lazy", "curious"
 };
 
-/* function prototypes */
-
 char *makeStringExact(const char *src);
 Cat *createCat(char *name, char *breed, int charm, int traits[]);
 BST_Node *createNode(Cat *newCat);
@@ -65,54 +63,51 @@ int removeByTrait(BST_Node **root, int traitIndex, int traitValue);
 
 int main() {
 
-    BST_Node *root = NULL; /* start with an empty tree */
+    BST_Node *root = NULL;
     int n, q;
     int i;
 
-    scanf("%d", &n); /* read total number of operations */
+    scanf("%d", &n);
 
     for (i = 0; i < n; i++) {
 
-        scanf("%d", &q); /* read which query type this operation is */
+        scanf("%d", &q);
 
-        /* query 1: insert a new cat into the leaderboard */
+        /* query 1: insert */
         if (q == 1) {
             char name[MAX_NAME + 1];
             char breed[MAX_NAME + 1];
             int charm;
             int traits[NUM_TRAITS];
-            int depth = 0;    /* tracks how deep the node lands in the tree */
-            int replaced = 0; /* set to 1 inside insert if a duplicate was found */
+            int depth = 0;    /* tracks insertion depth */
+            int replaced = 0; /* -1 ignored, 0 new node, 1 replaced */
 
-            /* read all cat fields from input */
             scanf("%s %s %d %d %d %d %d %d",
                   name, breed, &charm,
                   &traits[0], &traits[1], &traits[2], &traits[3], &traits[4]);
 
-            Cat *newCat = createCat(name, breed, charm, traits); /* build the cat struct */
-            root = insert(root, newCat, &depth, &replaced);      /* insert into BST */
+            Cat *newCat = createCat(name, breed, charm, traits);
+            root = insert(root, newCat, &depth, &replaced);
 
             if (replaced == 1)
-                printf("Replaced\n");           /* duplicate with strictly more traits */
+                printf("Replaced\n");
             else if (replaced == 0)
-                printf("Insert: %d\n", depth);  /* new node: print its depth */
-            /* else ignored, no output */
+                printf("Insert: %d\n", depth);
         }
 
-        /* query 2: remove a cat by name */
+        /* query 2: delete by name */
         else if (q == 2) {
             char name[MAX_NAME + 1];
             scanf("%s", name);
-            root = deleteNode(root, name); /* delete if found, no-op if not */
-            printf("Deletion Complete\n"); /* always print this regardless */
+            root = deleteNode(root, name);
+            printf("Deletion Complete\n");
         }
 
-        /* query 3: find the kth smallest cat alphabetically */
+        /* query 3: kth smallest */
         else if (q == 3) {
             int k;
             scanf("%d", &k);
 
-            /* check that k is a valid rank within the current tree size */
             if (root == NULL || k < 1 || k > getSubtreeSize(root)) {
                 printf("NO SMALLEST ELEMENT FOUND\n");
             }
@@ -122,10 +117,10 @@ int main() {
             }
         }
 
-        /* query 4: print all cats that match a given trait index and value */
+        /* query 4: filter by trait */
         else if (q == 4) {
             int traitIndex, traitValue;
-            int resultSize = 0; /* filterByTrait fills this with the match count */
+            int resultSize = 0;
             int j;
 
             scanf("%d %d", &traitIndex, &traitValue);
@@ -136,18 +131,18 @@ int main() {
                 printf("NONE FOUND\n");
             }
             else {
-                printf("%s:", TRAIT_NAMES[traitIndex]); /* print trait label first */
+                printf("%s:", TRAIT_NAMES[traitIndex]);
                 for (j = 0; j < resultSize; j++) {
                     printf(" %s", result[j]);
-                    free(result[j]); /* free each deep-copied name after printing */
+                    free(result[j]);
                 }
                 printf("\n");
             }
 
-            free(result); /* free the outer array */
+            free(result);
         }
 
-        /* query 5: mass-delete all cats that match a given trait index and value */
+        /* query 5: remove all matching a trait */
         else if (q == 5) {
             int traitIndex, traitValue;
             scanf("%d %d", &traitIndex, &traitValue);
@@ -157,32 +152,28 @@ int main() {
             if (removedCount == 0)
                 printf("NONE REMOVED\n");
             else
-                printf("%d\n", removedCount); /* print how many were removed */
+                printf("%d\n", removedCount);
         }
 
-        /* query 6: print every node in alphabetical order with its subtree size */
+        /* query 6: inorder print */
         else if (q == 6) {
             if (root == NULL)
                 printf("EMPTY\n");
             else
-                inorderPrint(root); /* name, charm, subtree_size for each node */
+                inorderPrint(root);
         }
     }
 
-    freeTree(root); /* free all remaining nodes and cat data before exit */
+    freeTree(root);
     return 0;
 }
 
-/* helper functions */
-
-/* allocate exact memory for a string and copy it */
 char *makeStringExact(const char *src) {
     char *res = (char *)malloc((strlen(src) + 1) * sizeof(char));
     strcpy(res, src);
     return res;
 }
 
-/* allocate and fill a Cat struct */
 Cat *createCat(char *name, char *breed, int charm, int traits[]) {
     Cat *temp = (Cat *)malloc(sizeof(Cat));
     int i;
@@ -197,7 +188,6 @@ Cat *createCat(char *name, char *breed, int charm, int traits[]) {
     return temp;
 }
 
-/* allocate a BST node wrapping the given Cat */
 BST_Node *createNode(Cat *newCat) {
     BST_Node *temp = (BST_Node *)malloc(sizeof(BST_Node));
     temp->cat = newCat;
@@ -207,7 +197,6 @@ BST_Node *createNode(Cat *newCat) {
     return temp;
 }
 
-/* free the strings inside a Cat, then the Cat itself */
 void freeCat(Cat *cat) {
     if (cat == NULL) return;
     free(cat->name);
@@ -215,7 +204,6 @@ void freeCat(Cat *cat) {
     free(cat);
 }
 
-/* free the whole tree */
 void freeTree(BST_Node *root) {
     if (root == NULL) return;
     freeTree(root->left);
@@ -224,8 +212,6 @@ void freeTree(BST_Node *root) {
     free(root);
 }
 
-
-/* count how many traits are set to 1 */
 int countTraits(Cat *cat) {
     int count = 0, i;
     for (i = 0; i < NUM_TRAITS; i++)
@@ -234,38 +220,32 @@ int countTraits(Cat *cat) {
     return count;
 }
 
-/* returns subtree size, 0 if null */
 int getSubtreeSize(BST_Node *root) {
     if (root == NULL) return 0;
     return root->subtree_size;
 }
 
-
-/* insert a cat into the BST, tracking depth and whether a duplicate was replaced */
 BST_Node *insert(BST_Node *root, Cat *newCat, int *depth, int *replaced) {
 
-    /* empty spot - place the node here */
     if (root == NULL)
         return createNode(newCat);
 
     int cmp = strcmp(newCat->name, root->cat->name);
 
     if (cmp == 0) {
-        /* duplicate name: replace only if strictly more traits */
         if (countTraits(newCat) > countTraits(root->cat)) {
             freeCat(root->cat);
             root->cat = newCat;
             *replaced = 1;
         }
         else {
-            /* reject the new cat - free it; -1 means ignored (no output) */
+            /* reject duplicate; -1 signals no output */
             freeCat(newCat);
             *replaced = -1;
         }
         return root;
     }
 
-    /* increment depth before going deeper */
     (*depth)++;
 
     if (cmp < 0)
@@ -273,14 +253,13 @@ BST_Node *insert(BST_Node *root, Cat *newCat, int *depth, int *replaced) {
     else
         root->right = insert(root->right, newCat, depth, replaced);
 
-    /* only update size if a new node was actually added */
+    /* only count up if a new node was actually added */
     if (*replaced == 0)
         root->subtree_size = 1 + getSubtreeSize(root->left) + getSubtreeSize(root->right);
 
     return root;
 }
 
-/* standard BST search by name */
 BST_Node *findNode(BST_Node *root, char *name) {
 
     if (root == NULL)
@@ -296,10 +275,8 @@ BST_Node *findNode(BST_Node *root, char *name) {
         return findNode(root->right, name);
 }
 
-/* return leftmost node in subtree (minimum alphabetically) */
 BST_Node *minVal(BST_Node *root) {
 
-    /* root stores the minimum */
     if (root->left == NULL)
         return root;
 
@@ -318,37 +295,31 @@ int hasOnlyRightChild(BST_Node *node) {
     return (node != NULL && node->left == NULL && node->right != NULL);
 }
 
-/* delete a cat by name, handling all three BST deletion cases */
 BST_Node *deleteNode(BST_Node *root, char *name) {
 
     BST_Node *save_node, *new_del_node;
     char *save_name;
 
-    /* name not in tree - nothing to do */
     if (root == NULL)
         return NULL;
 
     int cmp = strcmp(name, root->cat->name);
 
     if (cmp < 0) {
-        /* target is in left subtree */
         root->left = deleteNode(root->left, name);
     }
     else if (cmp > 0) {
-        /* target is in right subtree */
         root->right = deleteNode(root->right, name);
     }
     else {
-        /* found the node to delete */
-
-        /* case 1: leaf node */
+        /* case 1: leaf */
         if (isLeaf(root)) {
             freeCat(root->cat);
             free(root);
             return NULL;
         }
 
-        /* case 2a: only a left child */
+        /* case 2a: only left child */
         if (hasOnlyLeftChild(root)) {
             save_node = root->left;
             freeCat(root->cat);
@@ -356,7 +327,7 @@ BST_Node *deleteNode(BST_Node *root, char *name) {
             return save_node;
         }
 
-        /* case 2b: only a right child */
+        /* case 2b: only right child */
         if (hasOnlyRightChild(root)) {
             save_node = root->right;
             freeCat(root->cat);
@@ -364,10 +335,8 @@ BST_Node *deleteNode(BST_Node *root, char *name) {
             return save_node;
         }
 
-        /* case 3: two children - use in-order successor (min of right subtree) */
+        /* case 3: two children - replace with in-order successor */
         new_del_node = minVal(root->right);
-
-        /* copy successor's cat data into this node */
         save_name = makeStringExact(new_del_node->cat->name);
 
         freeCat(root->cat);
@@ -376,19 +345,15 @@ BST_Node *deleteNode(BST_Node *root, char *name) {
                                new_del_node->cat->charm,
                                new_del_node->cat->traits);
 
-        /* now delete the successor from the right subtree */
         root->right = deleteNode(root->right, save_name);
         free(save_name);
     }
 
-    /* update size on the way back up */
     root->subtree_size = 1 + getSubtreeSize(root->left) + getSubtreeSize(root->right);
 
     return root;
 }
 
-
-/* find the kth smallest node alphabetically using subtree sizes */
 BST_Node *findKthSmallest(BST_Node *root, int k) {
 
     int leftSize = getSubtreeSize(root->left);
@@ -401,7 +366,6 @@ BST_Node *findKthSmallest(BST_Node *root, int k) {
         return findKthSmallest(root->right, k - leftSize - 1);
 }
 
-/* inorder print: name, charm, subtree_size */
 void inorderPrint(BST_Node *root) {
     if (root == NULL) return;
 
@@ -410,7 +374,6 @@ void inorderPrint(BST_Node *root) {
     inorderPrint(root->right);
 }
 
-/* collect names of cats that match the trait, in order */
 void collectTraitMatches(BST_Node *root, int traitIndex, int traitValue,
                          char **result, int *idx) {
 
@@ -426,7 +389,6 @@ void collectTraitMatches(BST_Node *root, int traitIndex, int traitValue,
     collectTraitMatches(root->right, traitIndex, traitValue, result, idx);
 }
 
-/* return an array of names of cats matching the given trait index and value */
 char **filterByTrait(BST_Node *root, int traitIndex, int traitValue, int *resultSize) {
 
     int idx = 0;
@@ -445,7 +407,6 @@ char **filterByTrait(BST_Node *root, int traitIndex, int traitValue, int *result
 
     *resultSize = idx;
 
-    /* shrink array to actual number of results */
     if (idx == 0)
         result = (char **)realloc(result, sizeof(char *));
     else
@@ -454,7 +415,6 @@ char **filterByTrait(BST_Node *root, int traitIndex, int traitValue, int *result
     return result;
 }
 
-/* collect names of matching nodes to delete */
 void collectNamesToDelete(BST_Node *root, int traitIndex, int traitValue,
                           char **names, int *count) {
 
@@ -470,7 +430,6 @@ void collectNamesToDelete(BST_Node *root, int traitIndex, int traitValue,
     collectNamesToDelete(root->right, traitIndex, traitValue, names, count);
 }
 
-/* delete all cats matching the given trait index and value, return count removed */
 int removeByTrait(BST_Node **root, int traitIndex, int traitValue) {
 
     int count = 0, i, totalNodes;
@@ -483,7 +442,6 @@ int removeByTrait(BST_Node **root, int traitIndex, int traitValue) {
 
     collectNamesToDelete(*root, traitIndex, traitValue, names, &count);
 
-    /* delete each collected name */
     for (i = 0; i < count; i++) {
         *root = deleteNode(*root, names[i]);
         free(names[i]);
